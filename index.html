@@ -349,7 +349,7 @@
                     let chatHistory = [];
                     chatHistory.push({ role: "user", parts: [{ text: `Berikan satu ide inovatif dan futuristik singkat tentang topik: ${topic}. Jelaskan idenya dalam 2-3 kalimat.` }] });
                     const payload = { contents: chatHistory };
-                    const apiKey = "";
+                    const apiKey = "AIzaSyBTYkPdpMvS092y0K1C7w5tbWClPCCOq6w";
                     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
                     const response = await fetch(apiUrl, {
