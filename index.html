@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelas 7 F: Pionir Masa Depan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Digital Horizon -->
+    <!-- Application Structure Plan: Saya merancang aplikasi ini sebagai sebuah laman landas (landing page) vertikal yang terstruktur secara tematik untuk mengubah deskripsi statis menjadi pengalaman yang eksploratif. Strukturnya adalah: 1. Bagian Hero sebagai pengantar yang kuat. 2. Bagian Visi yang menguraikan konsep utama dalam kartu-kartu interaktif. 3. Bagian Pilar Pembelajaran yang memvisualisasikan keterampilan inti dalam tata letak diagram. 4. Bagian Laboratorium Inovasi yang memungkinkan pengguna menghasilkan ide-ide baru menggunakan AI. 5. Bagian Tantangan Masa Depan yang memungkinkan pengguna menghasilkan tantangan futuristik berdasarkan keahlian menggunakan AI. 6. Bagian Skenario Masa Depan yang memungkinkan pengguna menghasilkan skenario futuristik berdasarkan tren/teknologi menggunakan AI. 7. Bagian Pencipta Proyek Masa Depan yang memungkinkan pengguna mendapatkan ide proyek futuristik dari AI. 8. Bagian Arena Tempur Futuristik yang menyediakan game interaktif sederhana. 9. Bagian Profil Lulusan yang menggambarkan hasil yang diharapkan. 10. Bagian Ajakan Bertindak sebagai penutup yang memotivasi. Struktur ini dipilih untuk memecah teks panjang menjadi bagian-bagian yang mudah dicerna, menarik secara visual, dan mendorong interaksi pengguna untuk pemahaman yang lebih dalam, alih-alih hanya menyajikan teks mentah. -->
+    <!-- Visualization & Content Choices: 
+        - Laporan: Deskripsi Kelas 7 F (Futuristik).
+        - Tujuan: Menginformasikan, Mengorganisir, Melibatkan, Menghasilkan Ide, Menghasilkan Tantangan, Menghasilkan Skenario, Menghasilkan Ide Proyek, Menghibur/Melibatkan melalui Game.
+        - Metode Presentasi: Tata letak visual seperti kartu dan diagram yang dibuat dengan HTML/Tailwind CSS untuk merepresentasikan konsep-konsep kunci seperti 'Inovasi', 'Kreatif', dan 'Pemimpin'. Teks deskriptif yang lebih panjang disembunyikan pada awalnya. Fitur 'Laboratorium Inovasi', 'Tantangan Masa Depan', 'Skenario Masa Depan', dan 'Pencipta Proyek Masa Depan' menggunakan input teks dan area output untuk menampilkan ide/tantangan/skenario/proyek yang dihasilkan AI. Fitur 'Arena Tempur Futuristik' menggunakan elemen HTML Canvas untuk rendering game dan Vanilla JavaScript untuk logika game.
+        - Interaksi: Pengguna dapat mengarahkan kursor (hover) atau mengklik kartu/elemen untuk menampilkan teks deskriptif yang relevan. Interaksi ini dikelola oleh Vanilla JavaScript. Untuk fitur LLM, pengguna memasukkan teks dan mengklik tombol untuk memicu panggilan API ke LLM, kemudian hasilnya ditampilkan secara dinamis. Untuk game, interaksi meliputi input keyboard (panah kiri/kanan untuk bergerak, spasi untuk menembak) dan tombol untuk memulai ulang.
+        - Justifikasi: Mengubah presentasi dari pasif menjadi aktif. Pengguna didorong untuk menjelajahi konsep, yang membuat informasi lebih mudah diingat dan berdampak dibandingkan membaca paragraf panjang. Fitur LLM menambahkan dimensi interaktif yang kuat, memungkinkan pengguna untuk secara langsung berinteraksi dengan tema inovasi, kesiapan masa depan, visi futuristik, dan aplikasi praktis dari ide-ide kelas. Penambahan game memberikan elemen hiburan dan keterlibatan yang lebih dalam, selaras dengan tema futuristik dan mendorong pemikiran cepat.
+        - Library/Metode: HTML, Tailwind CSS, dan Vanilla JavaScript. Tidak ada pustaka grafik yang diperlukan karena kontennya bersifat kualitatif. Gemini API digunakan untuk fitur pembangkitan ide, tantangan, skenario, dan proyek. Game menggunakan Canvas API bawaan browser.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 25px -5px rgba(56, 189, 248, 0.2);
+            border-color: #38bdf8;
+        }
+        .card .description {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .card.active .description {
+            max-height: 200px;
+            transition: max-height 0.5s ease-in;
+        }
+        .icon {
+            font-size: 2.5rem;
+            line-height: 1;
+        }
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #38bdf8;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Game specific styles */
+        #gameCanvas {
+            background: linear-gradient(to bottom, #000033, #0f172a); /* Dark space background */
+            border: 2px solid #38bdf8;
+            border-radius: 8px;
+            display: block;
+            margin: 0 auto;
+        }
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .game-button {
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(56, 189, 248, 0.3);
+            border: none;
+        }
+        .game-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(56, 189, 248, 0.5);
+        }
+        .game-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(56, 189, 248, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <main class="container mx-auto px-4 py-8 md:py-16">
+
+        <!-- Section 1: Hero -->
+        <header class="text-center mb-16 md:mb-24">
+            <h1 class="text-4xl md:text-6xl font-black mb-4">
+                <span class="text-white">Kelas 7 F Futuristik</span><br>
+                <span class="gradient-text">Gerbang Masa Depan!</span>
+            </h1>
+            <p class="max-w-3xl mx-auto text-slate-400 md:text-lg">
+                Kelas ini adalah tempat para pemikir dan inovator muda berkumpul untuk menjelajahi potensi tanpa batas. Dengan tema futuristik, kami mengajak setiap siswa untuk tidak hanya belajar dari masa lalu dan memahami masa kini, tetapi juga untuk aktif merancang masa depan.
+            </p>
+        </header>
+
+        <!-- Section 2: Visi Kami -->
+        <section id="vision" class="mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-white">Visi Kami</h2>
+                <p class="max-w-2xl mx-auto mt-2 text-slate-400">Di Kelas 7 F, kami percaya bahwa masa depan adalah milik mereka yang berani bermimpi dan bertindak. Berikut adalah konsep inti yang menopang visi futuristik kami.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <div class="card rounded-xl p-6 text-center cursor-pointer" data-target="desc-inovasi">
+                    <div class="icon gradient-text mb-4">🚀</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Inovasi & Pelopor</h3>
+                    <p id="desc-inovasi" class="description text-slate-400">Semangat untuk terus menciptakan hal-hal baru, menemukan solusi kreatif, dan menjadi pelopor dalam ide-ide yang belum pernah ada.</p>
+                </div>
+                
+                <div class="card rounded-xl p-6 text-center cursor-pointer" data-target="desc-adaptif">
+                    <div class="icon gradient-text mb-4">⚙️</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Adaptif & Siap Era Baru</h3>
+                    <p id="desc-adaptif" class="description text-slate-400">Kemampuan untuk beradaptasi dengan teknologi terkini dan mengembangkan kemampuan yang relevan untuk tantangan masa depan, siap menghadapi era baru.</p>
+                </div>
+
+                <div class="card rounded-xl p-6 text-center cursor-pointer" data-target="desc-visioner">
+                    <div class="icon gradient-text mb-4">🔭</div>
+                    <h3 class="text-xl font-bold text-white mb-2">Pemikir Visioner</h3>
+                    <p id="desc-visioner" class="description text-slate-400">Melihat jauh ke depan, mengantisipasi tren, dan merancang masa depan yang lebih baik dengan semangat optimisme dan kecerdasan yang cemerlang.</p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Section 3: Pilar Pembelajaran -->
+        <section id="pillars" class="mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-white">Pilar Pembelajaran</h2>
+                <p class="max-w-2xl mx-auto mt-2 text-slate-400">Setiap pelajaran, diskusi, dan proyek di sini akan dirancang untuk memicu rasa ingin tahu kalian terhadap teknologi, ilmu pengetahuan, dan inovasi yang akan membentuk dunia esok.</p>
+            </div>
+            <div class="space-y-8">
+
+                <div class="flex flex-col md:flex-row items-center card rounded-xl p-6">
+                    <div class="icon gradient-text md:mr-6 mb-4 md:mb-0">💡</div>
+                    <h3 class="text-2xl font-bold text-white">Berpikir Kreatif</h3>
+                    <p class="text-slate-400">Mendorong siswa untuk menghasilkan ide-ide orisinal, berpikir di luar kotak, dan mengubah imajinasi menjadi kenyataan yang berdampak.</p>
+                </div>
+                
+                <div class="flex flex-col md:flex-row-reverse items-center card rounded-xl p-6">
+                    <div class="icon gradient-text md:ml-6 mb-4 md:mb-0">🧠</div>
+                    <h3 class="text-2xl font-bold text-white">Kritis & Analitis</h3>
+                    <p class="text-slate-400">Mengasah kemampuan untuk menganalisis informasi secara mendalam, mengevaluasi argumen, dan membuat keputusan berbasis data.</p>
+                </div>
+
+                <div class="flex flex-col md:flex-row items-center card rounded-xl p-6">
+                    <div class="icon gradient-text md:mr-6 mb-4 md:mb-0">🤝</div>
+                    <h3 class="text-2xl font-bold text-white">Kolaboratif & Solutif</h3>
+                    <p class="text-slate-400">Membekali diri dengan kemampuan bekerja sama dalam tim, berkomunikasi secara efektif, dan merancang solusi untuk masalah yang kompleks.</p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Section 4: Laboratorium Inovasi -->
+        <section id="innovation-lab" class="mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-white">Laboratorium Inovasi ✨</h2>
+                <p class="max-w-2xl mx-auto mt-2 text-slate-400">Miliki ide cemerlang untuk masa depan? Masukkan topik di bawah ini dan biarkan AI membantu Anda mengembangkan konsep inovatif!</p>
+            </div>
+            <div class="max-w-xl mx-auto bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-700">
+                <label for="innovation-topic" class="block text-slate-300 text-lg font-semibold mb-3">Topik Ide Inovasi Anda:</label>
+                <input type="text" id="innovation-topic" placeholder="Contoh: Energi terbarukan di kota masa depan" class="w-full p-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4">
+                <button id="generate-idea-btn" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-600 hover:to-purple-700 transition duration-300 ease-in-out flex items-center justify-center">
+                    <span id="button-text">Hasilkan Ide ✨</span>
+                    <div id="loading-spinner" class="loading-spinner ml-3 hidden"></div>
+                </button>
+                <div id="innovation-output" class="mt-6 p-4 bg-slate-700 rounded-lg border border-slate-600 text-slate-200 min-h-[100px] flex items-center justify-center text-center">
+                    Ide inovasi Anda akan muncul di sini.
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Tantangan Masa Depan -->
+        <section id="future-challenge" class="mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-white">Tantangan Masa Depan ✨</h2>
+                <p class="max-w-2xl mx-auto mt-2 text-slate-400">Siap menghadapi tantangan era baru? Masukkan area keahlian atau minat Anda dan dapatkan tantangan futuristik yang dirancang khusus untuk Anda!</p>
+            </div>
+            <div class="max-w-xl mx-auto bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-700">
+                <label for="challenge-topic" class="block text-slate-300 text-lg font-semibold mb-3">Area Keahlian/Minat Anda:</label>
+                <input type="text" id="challenge-topic" placeholder="Contoh: Robotika, Keberlanjutan, Desain Kota" class="w-full p-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4">
+                <button id="generate-challenge-btn" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-600 hover:to-purple-700 transition duration-300 ease-in-out flex items-center justify-center">
+                    <span id="challenge-button-text">Hasilkan Tantangan ✨</span>
+                    <div id="challenge-loading-spinner" class="loading-spinner ml-3 hidden"></div>
+                </button>
+                <div id="challenge-output" class="mt-6 p-4 bg-slate-700 rounded-lg border border-slate-600 text-slate-200 min-h-[100px] flex items-center justify-center text-center">
+                    Tantangan futuristik Anda akan muncul di sini.
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Skenario Masa Depan -->
+        <section id="future-scenario" class="mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-white">Skenario Masa Depan ✨</h2>
+                <p class="max-w-2xl mx-auto mt-2 text-slate-400">Bayangkan masa depan! Masukkan tren atau teknologi, dan AI akan membuat skenario singkat tentang dampaknya.</p>
+            </div>
+            <div class="max-w-xl mx-auto bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-700">
+                <label for="scenario-topic" class="block text-slate-300 text-lg font-semibold mb-3">Tren/Teknologi:</label>
+                <input type="text" id="scenario-topic" placeholder="Contoh: Kecerdasan Buatan dalam Pendidikan" class="w-full p-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4">
+                <button id="generate-scenario-btn" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-600 hover:to-purple-700 transition duration-300 ease-in-out flex items-center justify-center">
+                    <span id="scenario-button-text">Hasilkan Skenario ✨</span>
+                    <div id="scenario-loading-spinner" class="loading-spinner ml-3 hidden"></div>
+                </button>
+                <div id="scenario-output" class="mt-6 p-4 bg-slate-700 rounded-lg border border-slate-600 text-slate-200 min-h-[100px] flex items-center justify-center text-center">
+                    Skenario masa depan Anda akan muncul di sini.
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7: Pencipta Proyek Masa Depan -->
+        <section id="future-project-creator" class="mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-white">Pencipta Proyek Masa Depan ✨</h2>
+                <p class="max-w-2xl mx-auto mt-2 text-slate-400">Ingin memulai proyek futuristik? Masukkan bidang minat Anda, dan AI akan mengusulkan ide proyek lengkap dengan tujuan dan langkah awal!</p>
+            </div>
+            <div class="max-w-xl mx-auto bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-700">
+                <label for="project-topic" class="block text-slate-300 text-lg font-semibold mb-3">Bidang Minat Proyek Anda:</label>
+                <input type="text" id="project-topic" placeholder="Contoh: Kota Cerdas, Pertanian Vertikal" class="w-full p-3 rounded-lg bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4">
+                <button id="generate-project-btn" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-600 hover:to-purple-700 transition duration-300 ease-in-out flex items-center justify-center">
+                    <span id="project-button-text">Hasilkan Ide Proyek ✨</span>
+                    <div id="project-loading-spinner" class="loading-spinner ml-3 hidden"></div>
+                </button>
+                <div id="project-output" class="mt-6 p-4 bg-slate-700 rounded-lg border border-slate-600 text-slate-200 min-h-[100px] flex items-center justify-center text-center whitespace-pre-wrap">
+                    Ide proyek futuristik Anda akan muncul di sini.
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 8: Arena Tempur Futuristik -->
+        <section id="futuristic-arena" class="mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-white">Arena Tempur Futuristik 🎮</h2>
+                <p class="max-w-2xl mx-auto mt-2 text-slate-400">Uji refleks Anda di arena tempur luar angkasa! Kalahkan pesawat musuh dan raih skor tertinggi.</p>
+                <p class="max-w-2xl mx-auto mt-2 text-slate-400 font-semibold">Kontrol: Panah Kiri/Kanan untuk bergerak, Spasi untuk menembak.</p>
+            </div>
+            <div class="max-w-2xl mx-auto bg-slate-900 rounded-xl p-4 shadow-lg border border-blue-700 flex flex-col items-center">
+                <canvas id="gameCanvas" width="600" height="400" class="w-full max-w-full h-auto max-h-[400px]"></canvas>
+                <div class="game-controls mt-4 flex flex-col sm:flex-row w-full justify-center">
+                    <button id="startGameBtn" class="game-button mb-2 sm:mb-0 sm:mr-4">Mulai Game</button>
+                    <button id="restartGameBtn" class="game-button hidden">Mulai Ulang</button>
+                </div>
+                <div id="scoreDisplay" class="text-white text-xl font-bold mt-4">Skor: 0</div>
+            </div>
+        </section>
+
+        <!-- Section 9: Profil Lulusan -->
+        <section id="profile" class="mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-white">Profil Lulusan 7 F</h2>
+                <p class="max-w-2xl mx-auto mt-2 text-slate-400">Mari bersama-sama membangun dasar yang kuat untuk menjadi pribadi yang adaptif, inovatif, dan siap menghadapi era baru.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card rounded-xl p-6">
+                    <h4 class="text-xl font-bold gradient-text mb-2">Agen Perubahan</h4>
+                    <p class="text-slate-400">Siap menghadapi tantangan global dengan proaktif, membawa ide-ide segar, dan menginspirasi lingkungan sekitar.</p>
+                </div>
+                <div class="card rounded-xl p-6">
+                    <h4 class="text-xl font-bold gradient-text mb-2">Pemimpin Masa Depan</h4>
+                    <p class="text-slate-400">Memiliki karakter kuat, integritas, dan visi untuk memimpin tim atau proyek dengan efektif dan bertanggung jawab.</p>
+                </div>
+                <div class="card rounded-xl p-6 sm:col-span-2 lg:col-span-1">
+                    <h4 class="text-xl font-bold gradient-text mb-2">Penemu Inovatif</h4>
+                    <p class="text-slate-400">Terus mencari, menemukan, dan menciptakan solusi baru melalui pemahaman mendalam tentang ilmu pengetahuan dan teknologi.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 10: Call to Action -->
+        <footer class="text-center border-t border-slate-700 pt-12">
+            <h2 class="text-3xl font-bold text-white">Siap Melangkah Maju?</h2>
+            <p class="max-w-3xl mx-auto mt-4 text-slate-300 md:text-lg">
+                Di Kelas 7 F, imajinasi bertemu dengan realitas. Bersiaplah untuk melangkah maju, membentuk masa depan yang lebih cerah, dan menjadi bagian dari generasi pionir.
+            </p>
+        </footer>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.card[data-target]');
+            let activeCard = null;
+
+            cards.forEach(card => {
+                card.addEventListener('click', () => {
+                    if (activeCard && activeCard !== card) {
+                        activeCard.classList.remove('active');
+                    }
+                    
+                    card.classList.toggle('active');
+
+                    if (card.classList.contains('active')) {
+                        activeCard = card;
+                    } else {
+                        activeCard = null;
+                    }
+                });
+            });
+
+            document.addEventListener('click', (event) => {
+                if (activeCard && !activeCard.contains(event.target)) {
+                     activeCard.classList.remove('active');
+                     activeCard = null;
+                }
+            });
+
+            // Gemini API Integration Logic for Innovation Lab
+            const generateIdeaBtn = document.getElementById('generate-idea-btn');
+            const innovationTopicInput = document.getElementById('innovation-topic');
+            const innovationOutput = document.getElementById('innovation-output');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const buttonText = document.getElementById('button-text');
+
+            generateIdeaBtn.addEventListener('click', async () => {
+                const topic = innovationTopicInput.value.trim();
+                if (!topic) {
+                    innovationOutput.innerHTML = '<span class="text-red-400">Mohon masukkan topik untuk ide inovasi.</span>';
+                    return;
+                }
+
+                innovationOutput.innerHTML = ''; // Clear previous output
+                buttonText.textContent = 'Memproses...';
+                loadingSpinner.classList.remove('hidden');
+                generateIdeaBtn.disabled = true;
+
+                try {
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: `Berikan satu ide inovatif dan futuristik singkat tentang topik: ${topic}. Jelaskan idenya dalam 2-3 kalimat.` }] });
+                    const payload = { contents: chatHistory };
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        innovationOutput.textContent = text;
+                    } else {
+                        innovationOutput.innerHTML = '<span class="text-red-400">Gagal menghasilkan ide. Coba lagi.</span>';
+                    }
+                } catch (error) {
+                    console.error('Error calling Gemini API for Innovation Lab:', error);
+                    innovationOutput.innerHTML = '<span class="text-red-400">Terjadi kesalahan saat memproses ide.</span>';
+                } finally {
+                    buttonText.textContent = 'Hasilkan Ide ✨';
+                    loadingSpinner.classList.add('hidden');
+                    generateIdeaBtn.disabled = false;
+                }
+            });
+
+            // Gemini API Integration Logic for Future Challenge
+            const generateChallengeBtn = document.getElementById('generate-challenge-btn');
+            const challengeTopicInput = document.getElementById('challenge-topic');
+            const challengeOutput = document.getElementById('challenge-output');
+            const challengeLoadingSpinner = document.getElementById('challenge-loading-spinner');
+            const challengeButtonText = document.getElementById('challenge-button-text');
+
+            generateChallengeBtn.addEventListener('click', async () => {
+                const topic = challengeTopicInput.value.trim();
+                if (!topic) {
+                    challengeOutput.innerHTML = '<span class="text-red-400">Mohon masukkan area keahlian atau minat.</span>';
+                    return;
+                }
+
+                challengeOutput.innerHTML = ''; // Clear previous output
+                challengeButtonText.textContent = 'Memproses...';
+                challengeLoadingSpinner.classList.remove('hidden');
+                generateChallengeBtn.disabled = true;
+
+                try {
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: `Buat satu tantangan futuristik singkat untuk siswa Kelas 7 F yang berkaitan dengan area keahlian/minat: ${topic}. Jelaskan tantangannya dalam 2-3 kalimat.` }] });
+                    const payload = { contents: chatHistory };
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        challengeOutput.textContent = text;
+                    } else {
+                        challengeOutput.innerHTML = '<span class="text-red-400">Gagal menghasilkan tantangan. Coba lagi.</span>';
+                    }
+                } catch (error) {
+                    console.error('Error calling Gemini API for Future Challenge:', error);
+                    challengeOutput.innerHTML = '<span class="text-red-400">Terjadi kesalahan saat memproses tantangan.</span>';
+                } finally {
+                    challengeButtonText.textContent = 'Hasilkan Tantangan ✨';
+                    challengeLoadingSpinner.classList.add('hidden');
+                    generateChallengeBtn.disabled = false;
+                }
+            });
+
+            // Gemini API Integration Logic for Future Scenario
+            const generateScenarioBtn = document.getElementById('generate-scenario-btn');
+            const scenarioTopicInput = document.getElementById('scenario-topic');
+            const scenarioOutput = document.getElementById('scenario-output');
+            const scenarioLoadingSpinner = document.getElementById('scenario-loading-spinner');
+            const scenarioButtonText = document.getElementById('scenario-button-text');
+
+            generateScenarioBtn.addEventListener('click', async () => {
+                const topic = scenarioTopicInput.value.trim();
+                if (!topic) {
+                    scenarioOutput.innerHTML = '<span class="text-red-400">Mohon masukkan tren atau teknologi.</span>';
+                    return;
+                }
+
+                scenarioOutput.innerHTML = ''; // Clear previous output
+                scenarioButtonText.textContent = 'Memproses...';
+                scenarioLoadingSpinner.classList.remove('hidden');
+                generateScenarioBtn.disabled = true;
+
+                try {
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: `Buat satu skenario masa depan singkat (2-3 kalimat) tentang dampak tren/teknologi: ${topic}.` }] });
+                    const payload = { contents: chatHistory };
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        scenarioOutput.textContent = text;
+                    } else {
+                        scenarioOutput.innerHTML = '<span class="text-red-400">Gagal menghasilkan skenario. Coba lagi.</span>';
+                    }
+                } catch (error) {
+                    console.error('Error calling Gemini API for Future Scenario:', error);
+                    scenarioOutput.innerHTML = '<span class="text-red-400">Terjadi kesalahan saat memproses skenario.</span>';
+                } finally {
+                    scenarioButtonText.textContent = 'Hasilkan Skenario ✨';
+                    scenarioLoadingSpinner.classList.add('hidden');
+                    generateScenarioBtn.disabled = false;
+                }
+            });
+
+            // Gemini API Integration Logic for Future Project Creator
+            const generateProjectBtn = document.getElementById('generate-project-btn');
+            const projectTopicInput = document.getElementById('project-topic');
+            const projectOutput = document.getElementById('project-output');
+            const projectLoadingSpinner = document.getElementById('project-loading-spinner');
+            const projectButtonText = document.getElementById('project-button-text');
+
+            generateProjectBtn.addEventListener('click', async () => {
+                const topic = projectTopicInput.value.trim();
+                if (!topic) {
+                    projectOutput.innerHTML = '<span class="text-red-400">Mohon masukkan bidang minat proyek.</span>';
+                    return;
+                }
+
+                projectOutput.innerHTML = ''; // Clear previous output
+                projectButtonText.textContent = 'Memproses...';
+                projectLoadingSpinner.classList.remove('hidden');
+                generateProjectBtn.disabled = true;
+
+                try {
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: `Berikan satu ide proyek futuristik singkat (2-4 kalimat) untuk siswa Kelas 7 F tentang bidang minat: ${topic}. Sertakan tujuan dan satu langkah awal.` }] });
+                    const payload = { contents: chatHistory };
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        projectOutput.textContent = text;
+                    } else {
+                        projectOutput.innerHTML = '<span class="text-red-400">Gagal menghasilkan ide proyek. Coba lagi.</span>';
+                    }
+                } catch (error) {
+                    console.error('Error calling Gemini API for Future Project Creator:', error);
+                    projectOutput.innerHTML = '<span class="text-red-400">Terjadi kesalahan saat memproses ide proyek.</span>';
+                } finally {
+                    projectButtonText.textContent = 'Hasilkan Ide Proyek ✨';
+                    projectLoadingSpinner.classList.add('hidden');
+                    generateProjectBtn.disabled = false;
+                }
+            });
+
+            // Game Logic for Futuristic Arena
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const startGameBtn = document.getElementById('startGameBtn');
+            const restartGameBtn = document.getElementById('restartGameBtn');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+
+            let player, bullets, enemies, score, gameOver, gameInterval, enemySpawnInterval;
+
+            const PLAYER_SIZE = 30;
+            const PLAYER_SPEED = 3; // Reduced from 5
+            const BULLET_SIZE = 5;
+            const BULLET_SPEED = 4; // Reduced from 7
+            const ENEMY_SIZE = 25;
+            const ENEMY_SPEED = 1; // Reduced from 2
+            const ENEMY_SPAWN_RATE = 1500; // Increased from 1000 (slower spawn)
+
+            function initGame() {
+                player = {
+                    x: canvas.width / 2 - PLAYER_SIZE / 2,
+                    y: canvas.height - PLAYER_SIZE - 10,
+                    width: PLAYER_SIZE,
+                    height: PLAYER_SIZE,
+                    dx: 0
+                };
+                bullets = [];
+                enemies = [];
+                score = 0;
+                gameOver = false;
+                scoreDisplay.textContent = `Skor: ${score}`;
+                restartGameBtn.classList.add('hidden');
+                startGameBtn.classList.remove('hidden');
+                ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+                drawPlayer(); // Draw initial player
+            }
+
+            function startGame() {
+                initGame(); // Reset game state
+                startGameBtn.classList.add('hidden');
+                restartGameBtn.classList.remove('hidden');
+                gameInterval = setInterval(gameLoop, 1000 / 60); // 60 FPS
+                enemySpawnInterval = setInterval(spawnEnemy, ENEMY_SPAWN_RATE);
+            }
+
+            function endGame() {
+                clearInterval(gameInterval);
+                clearInterval(enemySpawnInterval);
+                gameOver = true;
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'white';
+                ctx.font = '30px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('GAME OVER!', canvas.width / 2, canvas.height / 2 - 20);
+                ctx.fillText(`Skor Akhir: ${score}`, canvas.width / 2, canvas.height / 2 + 20);
+                restartGameBtn.classList.remove('hidden');
+            }
+
+            function drawPlayer() {
+                ctx.fillStyle = '#38bdf8'; // Player color
+                ctx.fillRect(player.x, player.y, player.width, player.height);
+                // Simple futuristic ship shape
+                ctx.beginPath();
+                ctx.moveTo(player.x + player.width / 2, player.y - 10);
+                ctx.lineTo(player.x - 5, player.y + player.height);
+                ctx.lineTo(player.x + player.width + 5, player.y + player.height);
+                ctx.closePath();
+                ctx.fillStyle = '#818cf8';
+                ctx.fill();
+            }
+
+            function drawBullets() {
+                ctx.fillStyle = '#fde047'; // Bullet color (yellow)
+                bullets.forEach(bullet => {
+                    ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+                });
+            }
+
+            function drawEnemies() {
+                ctx.fillStyle = '#ef4444'; // Enemy color (red)
+                enemies.forEach(enemy => {
+                    ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+                });
+            }
+
+            function updateGame() {
+                if (gameOver) return;
+
+                // Update player position
+                player.x += player.dx;
+                if (player.x < 0) player.x = 0;
+                if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+                // Update bullets
+                bullets.forEach((bullet, index) => {
+                    bullet.y -= BULLET_SPEED;
+                    if (bullet.y < 0) {
+                        bullets.splice(index, 1);
+                    }
+                });
+
+                // Update enemies
+                enemies.forEach((enemy, enemyIndex) => {
+                    enemy.y += ENEMY_SPEED;
+                    if (enemy.y > canvas.height) {
+                        enemies.splice(enemyIndex, 1);
+                        // Player misses enemy, potentially lose health or just no score
+                    }
+
+                    // Collision: Bullet vs Enemy
+                    bullets.forEach((bullet, bulletIndex) => {
+                        if (bullet.x < enemy.x + enemy.width &&
+                            bullet.x + bullet.width > enemy.x &&
+                            bullet.y < enemy.y + enemy.height &&
+                            bullet.y + bullet.height > enemy.y) {
+                            
+                            bullets.splice(bulletIndex, 1); // Remove bullet
+                            enemies.splice(enemyIndex, 1);  // Remove enemy
+                            score += 10;
+                            scoreDisplay.textContent = `Skor: ${score}`;
+                        }
+                    });
+
+                    // Collision: Player vs Enemy
+                    if (player.x < enemy.x + enemy.width &&
+                        player.x + player.width > enemy.x &&
+                        player.y < enemy.y + enemy.height &&
+                        player.y + player.height > enemy.y) {
+                        endGame();
+                    }
+                });
+            }
+
+            function spawnEnemy() {
+                const x = Math.random() * (canvas.width - ENEMY_SIZE);
+                enemies.push({ x: x, y: 0, width: ENEMY_SIZE, height: ENEMY_SIZE });
+            }
+
+            function gameLoop() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawPlayer();
+                drawBullets();
+                drawEnemies();
+                updateGame();
+            }
+
+            // Event Listeners for Game Controls
+            document.addEventListener('keydown', (e) => {
+                if (gameOver) return;
+                if (e.key === 'ArrowLeft') {
+                    player.dx = -PLAYER_SPEED;
+                } else if (e.key === 'ArrowRight') {
+                    player.dx = PLAYER_SPEED;
+                } else if (e.key === ' ' || e.key === 'Spacebar') { // Spacebar for shooting
+                    bullets.push({
+                        x: player.x + player.width / 2 - BULLET_SIZE / 2,
+                        y: player.y,
+                        width: BULLET_SIZE,
+                        height: BULLET_SIZE
+                    });
+                }
+            });
+
+            document.addEventListener('keyup', (e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                    player.dx = 0;
+                }
+            });
+
+            startGameBtn.addEventListener('click', startGame);
+            restartGameBtn.addEventListener('click', startGame);
+
+            // Initial setup for the game canvas
+            initGame();
+        });
+    </script>
+
+</body>
+</html>
